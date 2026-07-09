@@ -1,0 +1,72 @@
+.controls {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+  
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  
+    background: rgba(32, 33, 36, 0.95);
+    padding: 12px 22px;
+    border-radius: 50px;
+  
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    z-index: 999;
+  }
+  
+  .control-btn,
+  .leave-btn {
+    width: 56px;
+    height: 56px;
+  
+    border: none;
+    border-radius: 50%;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    cursor: pointer;
+  
+    transition: all 0.2s ease;
+  }
+  
+  /* Icon Size */
+  .control-btn svg,
+  .leave-btn svg {
+    font-size: 22px;
+  }
+  
+  /* Normal Buttons */
+  .control-btn {
+    background: #3c4043;
+    color: #ffffff;
+  }
+  
+  .control-btn:hover {
+    background: #5f6368;
+    transform: scale(1.08);
+  }
+  
+  /* Mic/Camera Off */
+  .control-btn.danger {
+    background: #d93025;
+  }
+  
+  .control-btn.danger:hover {
+    background: #b3261e;
+  }
+  
+  /* Leave Button */
+  .leave-btn {
+    background: #ea4335;
+    color: white;
+    margin-left: 10px;
+  }
+  
+  .leave-btn:hover {
+    background: #c5221f;
+    transform: scale(1.08);
+  }
