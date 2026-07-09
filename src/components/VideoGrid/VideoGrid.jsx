@@ -43,7 +43,8 @@ function VideoGrid({
         <VideoCard
             key={userId}
             stream={stream}
-            name={participantMedia[userId]?.name || "Guest"}            micOn={participantMedia[userId]?.micOn ?? true}
+            name={participantMedia[userId]?.name || "Guest"}           
+             micOn={participantMedia[userId]?.micOn ?? true}
             cameraOn={participantMedia[userId]?.cameraOn ?? true}
             />
         ))}
