@@ -27,11 +27,15 @@ function VideoCard({
         isLocal,
         initials,
       });
-  useEffect(() => {
-    if (!videoRef.current || !stream) return;
-
-    videoRef.current.srcObject = stream;
-  }, [stream]);
+      useEffect(() => {
+        if (!videoRef.current || !stream) return;
+      
+        const video = videoRef.current;
+      
+        video.srcObject = stream;
+      
+        video.play().catch(() => {});
+      }, [stream, cameraOn]);
 
   return (
     <div className="video-card">
