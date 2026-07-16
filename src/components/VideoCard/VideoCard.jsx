@@ -14,6 +14,8 @@ function VideoCard({
   micOn = true,
   cameraOn = true,
   isLocal = false,
+  forceVideo = false,
+
 }) {
   const videoRef = useRef(null);
 
@@ -28,6 +30,19 @@ function VideoCard({
         initials,
       });
       useEffect(() => {
+        console.log("VIDEO CARD DEBUG");
+        console.log("NAME:", name);
+        console.log("CAMERA ON:", cameraOn);
+        console.log("FORCE VIDEO:", forceVideo);
+        console.log("STREAM:", stream);
+      
+        if (stream) {
+          console.log(
+            "VIDEO TRACK:",
+            stream.getVideoTracks()[0]
+          );
+        }
+      
         if (!videoRef.current || !stream) return;
       
         const video = videoRef.current;
@@ -35,7 +50,7 @@ function VideoCard({
         video.srcObject = stream;
       
         video.play().catch(() => {});
-      }, [stream, cameraOn]);
+      }, [stream, cameraOn, forceVideo]);
 
   return (
     <div className="video-card">
@@ -49,9 +64,24 @@ function VideoCard({
           {cameraOn ? <FaVideo /> : <FaVideoSlash />}
         </div>
       </div>
+      
 
       {/* Video */}
-      {cameraOn ? (
+      {(cameraOn || forceVideo) ? (
+  <video
+    ref={videoRef}
+    autoPlay
+    playsInline
+    muted={muted}
+  />
+) : (
+  <div className="camera-off">
+    <div className="avatar">
+      {initials}
+    </div>
+  </div>
+)}
+      {/* {cameraOn ? (
         <video
           ref={videoRef}
           autoPlay
@@ -64,7 +94,7 @@ function VideoCard({
             {initials}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* User Name */}
       <div className="video-name">

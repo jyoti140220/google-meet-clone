@@ -10,13 +10,19 @@ import { useState, useEffect } from "react";
 import socket from "../../services/socket";
 import { toast } from "react-toastify";
 import JoinMeeting from "../../components/JoinMeeting/JoinMeeting";
+// import ScreenShareView from "../../components/ScreenShareView/ScreenShareView";
 
 function Meeting() {
-     const navigate = useNavigate();
+    const navigate = useNavigate();
     const { roomId } = useParams();
     const [joined, setJoined] = useState(false);
-const [userName, setUserName] = useState("");
+    const [userName, setUserName] = useState("");
     const [participantMedia, setParticipantMedia] = useState({});
+    const [screenShare, setScreenShare] = useState({
+      isSharing: false,
+      presenterId: null,
+      presenterName: "",
+    });
     const {
       videoRef,
       localStream,
@@ -29,7 +35,13 @@ const [userName, setUserName] = useState("");
       stopCamera,
     
       toggleMic,
-      toggleCamera
+      toggleCamera,
+      screenStream,
+      isScreenSharing,
+      isScreenSharingRef,
+      startScreenShare,
+      stopScreenShare,
+      screenTrackRef,
     } = useLocalMedia();
 
 
@@ -40,8 +52,10 @@ const [userName, setUserName] = useState("");
       handleOffer,
       handleAnswer,
       handleIceCandidate,
+      replaceVideoTrack,
       removePeer
-    } = useWebRTC(localStreamRef);
+    } = useWebRTC(localStreamRef, screenTrackRef,
+      isScreenSharingRef);
  
     useSocket({
       enabled: joined,
@@ -105,6 +119,29 @@ const [userName, setUserName] = useState("");
           },
         }));
       },
+      onRoomState: (room) => {
+        setScreenShare({
+          isSharing: room?.isScreenSharing ?? false,
+          presenterId: room?.presenterId ?? null,
+          presenterName: room?.presenterName ?? "",
+        });
+      },
+      
+      onScreenShareStarted: (data) => {
+        setScreenShare({
+          isSharing: true,
+          presenterId: data.presenterId,
+          presenterName: data.presenterName,
+        });
+      },
+      
+      onScreenShareStopped: () => {
+        setScreenShare({
+          isSharing: false,
+          presenterId: null,
+          presenterName: "",
+        });
+      },
       onUserLeft: ({ userId, name }) => {
         removePeer(userId);
       
@@ -112,11 +149,54 @@ const [userName, setUserName] = useState("");
       },
     });
    
-  const shareScreen = () => {
-  
-    alert("Coming Soon");
-  
-  };
+    const shareScreen = async () => {
+     
+      // Already sharing
+      if (isScreenSharing) {
+        socket.emit("screen-share-stop", { roomId });
+    
+        stopScreenShare();
+    
+        const cameraTrack =
+          localStreamRef.current?.getVideoTracks()[0];
+    
+        if (cameraTrack) {
+          replaceVideoTrack(cameraTrack);
+        }
+    
+        return;
+      }
+    
+      // Start sharing
+      const screenTrack = await startScreenShare();
+      console.log("SCREEN TRACK0:", screenTrack);
+      console.log("CAMERA TRACK0:", localStreamRef.current?.getVideoTracks()[0]);
+    
+      if (!screenTrack) return;
+      console.log("SCREEN TRACK:", screenTrack);
+      console.log(
+        "CAMERA TRACK:",
+        localStreamRef.current?.getVideoTracks()[0]
+      );
+      // 👇 Screen sab peers ko bhejo
+      replaceVideoTrack(screenTrack);
+    
+      socket.emit("screen-share-start", { roomId });
+    
+      // Browser stop button
+      screenTrack.onended = () => {
+        const cameraTrack =
+          localStreamRef.current?.getVideoTracks()[0];
+    
+        if (cameraTrack) {
+          replaceVideoTrack(cameraTrack);
+        }
+    
+        socket.emit("screen-share-stop", { roomId });
+    
+        stopScreenShare();
+      };
+    };
   
   const leaveMeeting = () => {
     socket.emit("leave-room", roomId);
@@ -150,10 +230,17 @@ const [userName, setUserName] = useState("");
         <p>{userName}</p>
 
       </div>
+      {isScreenSharing && (
+  <div className="presenting-banner">
+    You are presenting
+  </div>
+)}
 
       <div className="video-container">
       <VideoGrid
         localStream={localStream}
+        screenStream={screenStream}
+        isScreenSharing={isScreenSharing}
         remoteStreams={remoteStreams}
         participantMedia={participantMedia}
         userName={userName}
@@ -161,6 +248,8 @@ const [userName, setUserName] = useState("");
           micOn,
           cameraOn,
         }}
+        screenShare={screenShare}
+
 />
 
 </div>
@@ -170,6 +259,7 @@ const [userName, setUserName] = useState("");
   cameraOn={cameraOn}
   toggleMic={() => toggleMic(roomId)}
   toggleCamera={() => toggleCamera(roomId)}
+  isSharing={isScreenSharing}
   shareScreen={shareScreen}
   leaveMeeting={leaveMeeting}
 />

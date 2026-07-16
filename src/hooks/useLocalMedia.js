@@ -7,7 +7,10 @@ function useLocalMedia() {
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
   const [localStream, setLocalStream] = useState(null);
-
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const isScreenSharingRef = useRef(false);
+  const screenStreamRef = useRef(null);
+  const screenTrackRef = useRef(null);
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -71,6 +74,40 @@ function useLocalMedia() {
       cameraOn: track.enabled,
     });
   };
+  const startScreenShare = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          cursor: "always",
+        },
+        audio: true,
+      });
+  
+      screenStreamRef.current = screenStream;
+  
+      const screenTrack = screenStream.getVideoTracks()[0];
+  
+      screenTrackRef.current = screenTrack;
+      isScreenSharingRef.current = true;
+      setIsScreenSharing(true);
+  
+      return screenTrack;
+    } catch (err) {
+      console.log("Screen Share Cancelled", err);
+  
+      return null;
+    }
+  };
+  const stopScreenShare = () => {
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((track) => track.stop());
+    }
+  
+    screenStreamRef.current = null;
+    screenTrackRef.current = null;
+    isScreenSharingRef.current = false;
+    setIsScreenSharing(false);
+  };
 
   return {
     videoRef,
@@ -85,6 +122,14 @@ function useLocalMedia() {
 
     toggleMic,
     toggleCamera,
+
+    isScreenSharing,
+    isScreenSharingRef,
+
+    startScreenShare,
+    stopScreenShare,
+
+    screenTrackRef,
   };
 }
 

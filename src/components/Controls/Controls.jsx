@@ -12,7 +12,7 @@ import {
   } from "react-icons/fa";
   
   import "./Controls.css";
-  
+  import { useState } from "react";
   function Controls({
     micOn,
     cameraOn,
@@ -22,7 +22,9 @@ import {
     shareScreen,
     leaveMeeting,
   }) {
+    const [showPresentMenu, setShowPresentMenu] = useState(false);
     return (
+      
       <div className="controls">
   
         {/* Mic */}
@@ -44,13 +46,20 @@ import {
         </button>
   
         {/* Screen Share */}
+
+        
         <button
-          className={`control-btn ${isSharing ? "active" : ""}`}
-          onClick={shareScreen}
-          title="Present now"
-        >
-          <FaDesktop />
-        </button>
+  className={isSharing ? "control-btn active" : "control-btn"}
+  onClick={() => {
+    if (isSharing) {
+      setShowPresentMenu(!showPresentMenu);
+    } else {
+      shareScreen();
+    }
+  }}
+>
+  <FaDesktop />
+</button>
   
         {/* Reactions */}
         <button
@@ -92,7 +101,18 @@ import {
         >
           <FaPhoneAlt />
         </button>
-  
+        {isSharing && showPresentMenu && (
+  <div className="present-menu">
+    <button
+      onClick={() => {
+        setShowPresentMenu(false);
+        shareScreen();
+      }}
+    >
+      Stop presenting
+    </button>
+  </div>
+)}
       </div>
     );
   }

@@ -1,4 +1,6 @@
 .video-grid{
+    position:relative;
+
     flex:1;
     display:grid;
     gap:16px;
@@ -33,3 +35,4 @@
     grid-auto-rows:300px;
 
 }
+

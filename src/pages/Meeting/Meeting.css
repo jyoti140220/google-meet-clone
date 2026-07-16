@@ -66,3 +66,13 @@
 
 }
 
+.presenting-banner {
+  background: #aeb0b3;
+  color: white;
+
+  padding: 10px 16px;
+
+  text-align: center;
+
+  font-weight: 600;
+}

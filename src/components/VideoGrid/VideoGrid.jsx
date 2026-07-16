@@ -7,6 +7,8 @@ function VideoGrid({
     participantMedia,
     userName,
     localMedia,
+    screenShare, // add
+
 }) {
     console.log("VideoGrid Render:", localStream);
 
@@ -46,6 +48,10 @@ function VideoGrid({
             name={participantMedia[userId]?.name || "Guest"}           
              micOn={participantMedia[userId]?.micOn ?? true}
             cameraOn={participantMedia[userId]?.cameraOn ?? true}
+            forceVideo={
+              screenShare?.isSharing &&
+              screenShare?.presenterId === userId
+            }
             />
         ))}
     </div>

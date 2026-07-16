@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";import socket from "../services/socket";
 
-function useWebRTC(localStreamRef) {
+function useWebRTC(localStreamRef, screenTrackRef,isScreenSharingRef) {
   // Store one RTCPeerConnection per remote user
   const peerConnections = useRef({});
   const [remoteStreams, setRemoteStreams] = useState({});
@@ -29,6 +29,16 @@ function useWebRTC(localStreamRef) {
       };
       peer.ontrack = (event) => {
         console.log("Remote Track Received:", userId);
+        console.log(
+          "REMOTE TRACK:",
+          event.track.kind,
+          event.track.label
+        );
+      
+        console.log(
+          "REMOTE STREAM:",
+          event.streams[0]
+        );
       
         setRemoteStreams((prev) => ({
           ...prev,
@@ -37,11 +47,50 @@ function useWebRTC(localStreamRef) {
       };
 
     // Add local tracks
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
+    // if (localStreamRef.current) {
+    //   localStreamRef.current.getTracks().forEach((track) => {
+    //     peer.addTrack(track, localStreamRef.current);
+    //   });
+    // }
+
+    // Add local tracks
+// Add local tracks
+if (localStreamRef.current) {
+
+  // Agar presenter screen share kar raha hai
+  if (
+    isScreenSharingRef.current &&
+    screenTrackRef.current
+  ) {
+
+    // Screen video
+    peer.addTrack(
+      screenTrackRef.current,
+      new MediaStream([screenTrackRef.current])
+    );
+
+    // Mic audio
+    const audioTrack =
+      localStreamRef.current.getAudioTracks()[0];
+
+    if (audioTrack) {
+      peer.addTrack(
+        audioTrack,
+        localStreamRef.current
+      );
+    }
+
+  } else {
+
+    // Camera + Mic
+    localStreamRef.current
+      .getTracks()
+      .forEach((track) => {
         peer.addTrack(track, localStreamRef.current);
       });
-    }
+
+  }
+}
 
     peerConnections.current[userId] = peer;
 
@@ -119,16 +168,35 @@ function useWebRTC(localStreamRef) {
     }
   };
   const replaceVideoTrack = (newTrack) => {
+
+    console.log(
+      "Replacing Track:",
+      newTrack
+    );  
     Object.values(peerConnections.current).forEach((peer) => {
+  
       const sender = peer
         .getSenders()
         .find((s) => s.track && s.track.kind === "video");
+  
+      console.log("VIDEO SENDER:", sender);
   
       if (sender) {
         sender.replaceTrack(newTrack);
       }
     });
   };
+  // const replaceVideoTrack = (newTrack) => {
+  //   Object.values(peerConnections.current).forEach((peer) => {
+  //     const sender = peer
+  //       .getSenders()
+  //       .find((s) => s.track && s.track.kind === "video");
+  
+  //     if (sender) {
+  //       sender.replaceTrack(newTrack);
+  //     }
+  //   });
+  // };
   const removePeer = (userId) => {
     const peer = peerConnections.current[userId];
   
@@ -154,6 +222,7 @@ function useWebRTC(localStreamRef) {
     handleOffer,
     handleAnswer,
     handleIceCandidate,
+    replaceVideoTrack,
     removePeer
   };
 }

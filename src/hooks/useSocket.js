@@ -14,6 +14,9 @@ function useSocket({
     onIceCandidate,
     onCameraToggle,
     onMicToggle,
+    onRoomState,
+    onScreenShareStarted,
+    onScreenShareStopped,
     onUserLeft
 }) {
   useEffect(() => {
@@ -44,6 +47,11 @@ function useSocket({
 
         onExistingUsers(users);
       });
+      socket.on("room-state", (data) => {
+        console.log("Room State:", data);
+      
+        onRoomState(data);
+      });
 
       socket.on("user-joined", (user) => {
         console.log("New User Joined:", user);
@@ -68,6 +76,16 @@ function useSocket({
         console.log("Remote Mic Event:", data);
         onMicToggle(data);
     });
+    socket.on("screen-share-started", (data) => {
+      console.log("Screen Share Started:", data);
+    
+      onScreenShareStarted(data);
+    });
+    socket.on("screen-share-stopped", () => {
+      console.log("Screen Share Stopped");
+    
+      onScreenShareStopped();
+    });
     socket.on("user-left", (user) => {
         console.log("User Left:", user);
       
@@ -88,6 +106,9 @@ function useSocket({
         socket.off("ice-candidate");
         socket.off("camera-toggle");
         socket.off("mic-toggle");
+        socket.off("room-state");
+        socket.off("screen-share-started");
+        socket.off("screen-share-stopped");
         socket.off("user-left");
       
         socket.disconnect();

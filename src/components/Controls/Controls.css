@@ -70,3 +70,34 @@
     background: #c5221f;
     transform: scale(1.08);
   }
+
+  .control-btn.active {
+    background: #8ab4f8;
+    color: #202124;
+  }
+
+
+  .present-menu {
+    position: absolute;
+    bottom: 90px;
+  
+    background: #2d2e30;
+  
+    border-radius: 12px;
+  
+    padding: 10px;
+  
+    min-width: 180px;
+  
+    box-shadow: 0 4px 16px rgba(0,0,0,.3);
+  }
+  
+  .present-menu button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: white;
+    padding: 12px;
+    cursor: pointer;
+    text-align: left;
+  }
